@@ -1,16 +1,31 @@
-# streamit_app
+# Introduction
 
-A new Flutter project.
+Introducing StreamIt: a Peer-to-Peer File streaming App! Say goodbye to file size limitations and tedious uploads. Create a room, invite your peers, upload any file, and let StreamIt handle the rest. Effortless, seamless, and hassle-free file sharing for everyone! 🚀📁 #PeerToPeer #FileStreaming #EffortlessSharing
 
-## Getting Started
+This repository is the Flutter Mobile Application code!
 
-This project is a starting point for a Flutter application.
+# Getting Started
 
-A few resources to get you started if this is your first Flutter project:
+1. `pub get` to install the dependencies
+2. `flutter run` to run the app
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+# Build and Test
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. `flutter build apk` to build the apk
+2. `flutter test` to run the tests
+
+# Important Links
+
+- [Web Client Repo](https://github.com/RoshanJose7/streamit-client)
+- [Websocket Server Repo](https://github.com/RoshanJose7/streamit-api)
+- [Working Demo](https://drive.google.com/file/d/16Uq2_A7GSlhI03B5DC8SGWen2aYWKj9k/view?usp=sharing)
+
+# Contribute
+
+TODO: Explain how other users and developers can contribute to make your code better.
+
+If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
+
+- [ASP.NET Core](https://github.com/aspnet/Home)
+- [Visual Studio Code](https://github.com/Microsoft/vscode)
+- [Chakra Core](https://github.com/Microsoft/ChakraCore)

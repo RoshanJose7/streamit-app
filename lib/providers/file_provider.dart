@@ -26,21 +26,19 @@ class FileProvider extends ChangeNotifier {
   File? _currentFileToBeSent;
   File? _currentReceivingFile;
 
-  final List<FileTransfer> _transfers = [];
+  final List _messages = [];
 
-  List<FileTransfer> get transfers => _transfers;
+  List get messages => _messages;
 
   String? get name => _name;
   String? get room => _room;
 
   FileProvider() {
-    socket = io(
-        'https://a512-2401-4900-62ab-57ae-adea-41d9-1204-c3ee.ngrok-free.app/',
-        <String, dynamic>{
-          'upgrade': false,
-          'transports': ["websocket"],
-          'maxHttpBufferSize': chunkSize,
-        });
+    socket = io('https://d55b-49-206-133-199.ngrok-free.app', <String, dynamic>{
+      'upgrade': false,
+      'transports': ["websocket"],
+      'maxHttpBufferSize': chunkSize,
+    });
 
     socket.connect();
     socket.on('connect', (_) => debugPrint('Connected: ${socket.id}'));
@@ -78,8 +76,9 @@ class FileProvider extends ChangeNotifier {
     debugPrint("notification: ${data["type"]}");
     String type = data["type"];
 
-    if (type == "new_file") {
-      debugPrint("New file created!");
+    if (type == "log") {
+      _messages.add(data["notification"]);
+    } else if (type == "new_file") {
       Directory? externalDirectory = await getExternalStorageDirectory();
 
       _currentReceivingFile =
@@ -90,7 +89,6 @@ class FileProvider extends ChangeNotifier {
     } else if (type == "percentage_update") {
       progressPercentage = data["data"]["percentage"];
     } else if (type == "new_file_received") {
-      debugPrint("New file received!");
       final fileData = data["data"];
 
       FileTransfer newFile = FileTransfer(
@@ -102,15 +100,13 @@ class FileProvider extends ChangeNotifier {
         timestamp: DateTime.now().toUtc(),
       );
 
-      print(_currentReceivingFile!.path);
-      _transfers.add(newFile);
-      notifyListeners();
+      _messages.add(newFile);
     }
+
+    notifyListeners();
   }
 
   void filePartReceive(dynamic data) async {
-    print(_currentReceivingFile);
-
     if (_currentReceivingFile != null) {
       Uint8List chunkData = data["chunk"];
 
@@ -125,53 +121,26 @@ class FileProvider extends ChangeNotifier {
     final length = _currentFileToBeSent!.lengthSync();
     final raFile = _currentFileToBeSent!.openSync();
 
-    // while (pos < length) {
-    //   final bytes = Uint8List(length);
-    //
-    //   raFile.readIntoSync(bytes, pos, (pos + chunkSize).clamp(0, length));
-    //   uploadChunk(bytes, data["transferid"], pos);
-    //
-    //   pos += chunkSize;
-    // }
+    final percentage = (100 / _currentChunkCount) * 1;
 
-    // socket.emit("file_complete", data);
-    // _currentFileToBeSent = null;
-    //
-    // debugPrint("File Sent!");
-
-    // TODO: Delete TEST Code Later
     int start = _currentPosition;
     int end = (_currentPosition + chunkSize).clamp(0, length);
 
     List<int> bytes = Uint8List(end);
     List<int> chunkBytes = Uint8List(end - start);
 
-    print("size: $length");
-    print("start: $start");
-    print("end: $end");
-    print("bytes.length: ${bytes.length}");
-
     raFile.readIntoSync(bytes, start, end);
 
-    print(chunkBytes.length < end);
-
     List.copyRange(chunkBytes, 0, bytes, start, end);
-    print("chunkBytes.length: ${chunkBytes.length}");
 
     uploadChunk(chunkBytes, data["transferid"], _currentPosition);
 
     raFile.closeSync();
-    // pos += chunkSize;
   }
 
   Future<void> ackFilePart(dynamic data) async {
-    // String id, int counter, bool chunkReceived
-
     final raFile = await _currentFileToBeSent!.open();
     final length = await _currentFileToBeSent!.length();
-
-    print("size: $length");
-    print("_currentPosition: $_currentPosition");
 
     if ((_currentPosition + chunkSize) >= length) {
       socket.emit("file_complete", {
@@ -190,7 +159,6 @@ class FileProvider extends ChangeNotifier {
       } else {
         // Next Chunk
         _currentPosition += chunkSize;
-        print("Chunk success at ${data["counter"]}");
       }
 
       int start = _currentPosition;
@@ -199,15 +167,9 @@ class FileProvider extends ChangeNotifier {
       List<int> bytes = Uint8List(end);
       List<int> chunkBytes = Uint8List(end - start);
 
-      print("size: $length");
-      print("start: $start");
-      print("end: $end");
-      print("bytes.length: ${bytes.length}");
-
       raFile.readIntoSync(bytes, start, end);
 
       List.copyRange(chunkBytes, 0, bytes, start, end);
-      print("chunkBytes.length: ${chunkBytes.length}");
 
       uploadChunk(chunkBytes, data["transferid"], _currentPosition);
 
@@ -217,6 +179,7 @@ class FileProvider extends ChangeNotifier {
 
   void createFile(File file, String fileid) async {
     _currentFileToBeSent = file;
+
     final transferid = uuid.v4();
     FileStat fileStat = await file.stat();
 
@@ -244,23 +207,13 @@ class FileProvider extends ChangeNotifier {
       timestamp: DateTime.now().toUtc(),
     );
 
-    _transfers.add(newFile);
+    _messages.add(newFile);
 
     socket.emit("file_create", data);
     notifyListeners();
   }
 
   Future uploadChunk(dynamic chunk, String transferid, int i) async {
-    print("i: $i");
-    print("transferid: $transferid");
-    print("length: ${chunk.length}");
-
-    // String checksum = sha256.convert(chunk).toString();
-    // print("checksum $checksum");
-    // int progressPercentage = ((i / chunkCount) * 100).round();
-    // print("chunkCount $chunkCount");
-    // print("progressPercentage $progressPercentage");
-
     socket.emit("file_part", {
       "transferid": transferid,
       "chunk": chunk,

@@ -115,16 +115,16 @@ class _JoinRoomPageState extends State<JoinRoomPage> {
                         fileProvider.setName = _userName!;
                         fileProvider.joinRoom(_roomName!);
 
-                        Permission.storage
-                            .request()
-                            .then((_) => Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => RoomPage(
-                                      roomName: _roomName!,
-                                      userName: _userName!,
-                                    ),
+                        Permission.storage.request().then(
+                              (_) => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => RoomPage(
+                                    roomName: _roomName!,
+                                    userName: _userName!,
                                   ),
-                                ));
+                                ),
+                              ),
+                            );
                       }
                     },
                     child: const Text('Create / Join Room'),

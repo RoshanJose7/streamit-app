@@ -88,7 +88,7 @@ class _RoomPageState extends State<RoomPage> {
               ),
             ],
           ),
-          fileProvider.transfers.isEmpty
+          fileProvider.messages.isEmpty
               ? const Column(
                   children: [
                     Padding(
@@ -103,94 +103,103 @@ class _RoomPageState extends State<RoomPage> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: ListView.separated(
-                      itemCount: fileProvider.transfers.length,
+                      itemCount: fileProvider.messages.length,
                       separatorBuilder: (ctx, idx) =>
                           const SizedBox(height: 10),
                       itemBuilder: (ctx, idx) {
-                        final fileData = fileProvider.transfers[idx];
+                        final fileData = fileProvider.messages[idx];
 
-                        return InkWell(
-                          onTap: () {
-                            Directory generalDownloadDir =
-                                Directory('/storage/emulated/0/Download');
-                            fileProvider.transfers[idx].file.copySync(
-                                "${generalDownloadDir.path}/${fileProvider.transfers[idx].fileName}");
+                        if (fileData.runtimeType == String) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Center(
+                              child: Text(fileData),
+                            ),
+                          );
+                        } else {
+                          return InkWell(
+                            onTap: () {
+                              Directory generalDownloadDir =
+                                  Directory('/storage/emulated/0/Download');
+                              fileProvider.messages[idx].file.copySync(
+                                  "${generalDownloadDir.path}/${fileProvider.messages[idx].fileName}");
 
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  "${fileProvider.transfers[idx].fileName} saved to ${generalDownloadDir.path}",
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    "${fileProvider.messages[idx].fileName} saved to ${generalDownloadDir.path}",
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                          child: Align(
-                            alignment: fileData.isLeft
-                                ? Alignment.centerLeft
-                                : Alignment.centerRight,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 5,
-                                horizontal: 10,
-                              ),
-                              constraints: const BoxConstraints(
-                                maxWidth: 200,
-                                minWidth: 100,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: kLightGray,
-                                  width: 2,
+                              );
+                            },
+                            child: Align(
+                              alignment: fileData.isLeft
+                                  ? Alignment.centerLeft
+                                  : Alignment.centerRight,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 5,
+                                  horizontal: 10,
                                 ),
-                                borderRadius: const BorderRadius.all(
-                                  Radius.circular(5),
+                                constraints: const BoxConstraints(
+                                  maxWidth: 200,
+                                  minWidth: 100,
                                 ),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.file_present),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          fileData.sender,
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        Text(
-                                          fileData.fileName,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 5),
-                                        Align(
-                                          alignment: Alignment.bottomRight,
-                                          child: Text(
-                                            DateFormat.ms().format(
-                                              fileData.timestamp.toUtc(),
-                                            ),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: kLightGray,
+                                    width: 2,
+                                  ),
+                                  borderRadius: const BorderRadius.all(
+                                    Radius.circular(5),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.file_present),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            fileData.sender,
                                             style: const TextStyle(
-                                              fontSize: 10,
+                                              fontSize: 14,
                                               fontWeight: FontWeight.w600,
                                             ),
                                           ),
-                                        ),
-                                      ],
+                                          Text(
+                                            fileData.fileName,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 5),
+                                          Align(
+                                            alignment: Alignment.bottomRight,
+                                            child: Text(
+                                              DateFormat.ms().format(
+                                                fileData.timestamp.toUtc(),
+                                              ),
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        );
+                          );
+                        }
                       },
                     ),
                   ),
